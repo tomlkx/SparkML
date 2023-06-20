@@ -2,6 +2,7 @@ package SparkMLLearn
 
 import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.recommendation.{ALS, ALSModel}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
 import scala.Console.println
 
