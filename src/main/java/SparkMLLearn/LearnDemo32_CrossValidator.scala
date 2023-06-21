@@ -2,7 +2,7 @@ package SparkMLLearn
 
 import org.apache.spark.ml.{Pipeline, linalg}
 import org.apache.spark.ml.classification.LogisticRegression
-import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
+import org.apache.spark.ml.evaluation.{BinaryClassificationEvaluator, MulticlassClassificationEvaluator}
 import org.apache.spark.ml.feature.{HashingTF, Tokenizer}
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.tuning.{CrossValidator, CrossValidatorModel, ParamGridBuilder}
@@ -69,7 +69,7 @@ object LearnDemo32_CrossValidator {
       // 使用管道作为估计器（estimator）
       .setEstimator(pipeline)
       // 使用二分类评估器（evaluator）进行模型评估
-      .setEvaluator(new BinaryClassificationEvaluator)
+      .setEvaluator(new MulticlassClassificationEvaluator)
       // 使用参数网格（paramGrid）进行参数搜索
       .setEstimatorParamMaps(paramGrid)
       //设置交叉验证的折数（numFolds）为2
