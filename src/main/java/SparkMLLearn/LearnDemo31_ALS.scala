@@ -52,6 +52,7 @@ object LearnDemo31_ALS {
 
     // 为所有电影生成推荐结果
     val movieRecs: DataFrame = model.recommendForAllItems(10)
+
     // 从评分数据中选择不重复的用户列，并限制为3行，用于生成用户子集的推荐结果
     val users: Dataset[Row] = ratings.select(als.getUserCol).distinct().limit(3)
 
