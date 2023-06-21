@@ -54,8 +54,8 @@ object LearnDemo32_CrossValidator {
 
     // 创建Pipeline管道
     val pipeline: Pipeline = new Pipeline()
+      // 设置管道的阶段，按顺序包括分词器、特征转换器和逻辑回归模型
       .setStages(Array(tokenizer, hashingTF, lr))
-    // 设置管道的阶段，按顺序包括分词器、特征转换器和逻辑回归模型
 
     // 创建参数网格
     val paramGrid: Array[ParamMap] = new ParamGridBuilder()
@@ -64,7 +64,6 @@ object LearnDemo32_CrossValidator {
       // 对于逻辑回归模型，尝试不同的正则化参数（regParam）
       .addGrid(lr.regParam, Array(0.1, 0.01))
       .build()
-
     // 创建交叉验证器
     val cv: CrossValidator = new CrossValidator()
       // 使用管道作为估计器（estimator）
