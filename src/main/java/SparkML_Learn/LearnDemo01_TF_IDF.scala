@@ -1,4 +1,4 @@
-package SparkMLLearn
+package SparkML_Learn
 
 import org.apache.spark.ml.feature.{HashingTF, IDF, IDFModel, Tokenizer}
 import org.apache.spark.sql.{DataFrame, SparkSession}
