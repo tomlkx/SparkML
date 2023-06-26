@@ -17,7 +17,7 @@ object demo03 {
     val pro = new Properties()
     pro.load(new FileInputStream(URLDecoder.decode(demo03.getClass.getResource("/jdbc.properties").getPath, "utf-8")))
     spark.read.jdbc("jdbc:mysql://192.168.45.5:20228/shtd_industry", "MachineData", pro).show()
-    spark.read.jdbc("jdbc:mysql://localhost:3306/shtd_industry", "MachineData", pro)
+    spark.read.jdbc("jdbc:mysql://192.168.45.5:3306/shtd_industry", "MachineData", pro)
     // 过滤为null
       .filter(item => {
         item.get(3).toString != null
@@ -41,8 +41,8 @@ object demo03 {
         fact_machine_learning_data(
           item._1,
           item._2,
-          
           isStatus(hash.getOrElse("机器状态", 0.0).toString),
+          h_get(hash, "主轴转速"),
           h_get(hash, "主轴倍率"),
           h_get(hash, "主轴负载"),
           h_get(hash, "进给倍率"),
@@ -83,7 +83,7 @@ object demo03 {
   }
 
   case class fact_machine_learning_data(
-
+                                         machine_record_id:Int,
                                          machine_id: Double,
                                          machine_record_state: Double,
                                          machine_record_mainshaft_speed: Double,
