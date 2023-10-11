@@ -6,10 +6,10 @@ import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.{IndexToString, StringIndexer, VectorIndexer, VectorIndexerModel}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object LearnDemo20_RandomForestClassifier {
+case object LearnDemo20_RandomForestClassifier {
   def main(args: Array[String]): Unit = {
     //创建SparkSession
-    val spark: SparkSession = SparkSession.builder().master("local[*]").appName("demo").getOrCreate()
+    val spark: SparkSession = SparkSession.builder().config("spark.serializer", "org.apache.spark.serializer.KryoSerializer").master("local[*]").appName("demo").getOrCreate()
     //加载并解析数据文件,将其转换为DataFrame
     val data: DataFrame = spark.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
     data.show

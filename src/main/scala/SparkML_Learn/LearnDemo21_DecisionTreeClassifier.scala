@@ -1,11 +1,10 @@
 package SparkML_Learn
 
-import org.apache.spark.ml.{Pipeline, PipelineModel, classification}
+import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.{IndexToString, StringIndexer, StringIndexerModel, VectorIndexer, VectorIndexerModel}
-import org.apache.spark.mllib.tree.DecisionTree
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame,SparkSession}
 
 object LearnDemo21_DecisionTreeClassifier {
   def main(args: Array[String]): Unit = {

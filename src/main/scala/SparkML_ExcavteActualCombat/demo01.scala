@@ -1,26 +1,23 @@
 package SparkML_ExcavteActualCombat
 
-import org.apache.spark.ml.{Pipeline, linalg}
+import org.apache.spark.ml.linalg
 import org.apache.spark.ml.feature.{StandardScaler, StandardScalerModel, VectorAssembler}
-import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.ml.linalg.{Vector => SVector, Vectors => SVectors}
-import org.apache.spark.rdd.RDD
+import org.apache.spark.ml.linalg.{Vectors => SVectors}
 
-import java.io.FileInputStream
-import java.net.URLDecoder
 import java.util.Properties
 
 object demo01 {
   def main(args: Array[String]): Unit = {
-    val spark: SparkSession = SparkSession.builder().appName("demo").master("local[*]").getOrCreate()
-    val properties = new Properties()
-    properties.load(new FileInputStream(URLDecoder.decode(demo01.getClass.getResource("/jdbc.properties").getPath, "utf-8")))
+    val spark: SparkSession = SparkSession.builder().appName("demo").master("local[8]").getOrCreate()
+    val pro = new Properties()
+    pro.setProperty("user", "root")
+    pro.setProperty("password", "123456")
     import org.apache.spark.sql.functions._
     import spark.implicits._
-    spark.read.jdbc("jdbc:mysql://192.168.45.5:20228/ds_db01", "order_master", properties).createTempView("order_master")
-    spark.read.jdbc("jdbc:mysql://192.168.45.5:20228/ds_db01", "order_detail", properties).createTempView("order_detail")
-    spark.read.jdbc("jdbc:mysql://192.168.45.5:20228/ds_db01", "product_info", properties).createTempView("product_info")
+    spark.read.jdbc("jdbc:mysql://bigdata1:3306/ds_db01", "order_master", pro).createTempView("order_master")
+    spark.read.jdbc("jdbc:mysql://bigdata1:3306/ds_db01", "order_detail", pro).createTempView("order_detail")
+    spark.read.jdbc("jdbc:mysql://bigdata1:3306/ds_db01", "product_info", pro).createTempView("product_info")
     spark.sql(
       """
         |select counts,customer_id
@@ -41,6 +38,7 @@ object demo01 {
         |      limit 10) e
         |""".stripMargin)
       .createTempView("dataView1");
+    spark.table("dataView1").select("customer_id").take(10).map(_(0)).mkString(",")
     spark.sql("select distinct b.product_id from (select * from order_master where customer_id in(5811)) a inner join order_detail as b on a.order_sn=b.order_sn").createTempView("dataView2")
     spark.sql(
       """
@@ -58,23 +56,24 @@ object demo01 {
       .setInputCol("features")
       .setOutputCol("StanFeatures")
     val data2: DataFrame = vs.transform(spark.table("product_info"))
+    data2.show()
     val model: StandardScalerModel = ss.fit(data2)
     //特征提取
     model.transform(data2).createTempView("dataView4")
     //获取与5811 购买相似商品的前是个用户所购买的商品列表
-    val r1: Array[(Long,  linalg.Vector)] = spark.table("dataView3").join(spark.table("dataView4"), Seq("product_id"))
+    val r1: Array[(Long, linalg.Vector)] = spark.table("dataView3").join(spark.table("dataView4"), Seq("product_id"))
       .select("product_id", "StanFeatures")
       .collect()
       .map {
-        case Row(product_id: Long,stanFeatures:  linalg.Vector) =>
+        case Row(product_id: Long, stanFeatures: linalg.Vector) =>
           (product_id, stanFeatures)
       }
     //获取5811 购买的商品
-    val r2: Array[(Long,linalg.Vector)] = spark.table("dataView2").join(spark.table("dataView4"), Seq("product_id"))
+    val r2: Array[(Long, linalg.Vector)] = spark.table("dataView2").join(spark.table("dataView4"), Seq("product_id"))
       .select("product_id", "StanFeatures")
       .collect()
       .map {
-        case Row(product_id: Long, stanFeatures:  linalg.Vector) =>
+        case Row(product_id: Long, stanFeatures: linalg.Vector) =>
           (product_id, stanFeatures)
       }
     //存储结果
@@ -88,13 +87,13 @@ object demo01 {
         count = count + 1
         Similaritys = Similaritys + Similarity
       }
-      resultList = resultList  :+ (x._1,Similaritys / count )
+      resultList = resultList :+ (x._1, Similaritys / count)
     }
     resultList.sortBy(-_._2).foreach(println)
     spark.stop()
   }
 
-  def cosineSimilarity(v1:  linalg.Vector, v2:  linalg.Vector): Double = {
+  def cosineSimilarity(v1: linalg.Vector, v2: linalg.Vector): Double = {
     //点积运算
     val dotProduct = v1.dot(v2)
     //使用欧几里得范数标准化规范化  计算两个向量模的乘积

@@ -25,7 +25,7 @@ object LearnDemo15_StandardScaler {
     val va: VectorAssembler = new VectorAssembler()
       .setInputCols(Array("feature1", "feature2"))
       .setOutputCol("features")
-
+    va.transform(df).show()
     // 将DataFrame转换为包含向量特征列的新DataFrame
     val asDataFrame: DataFrame = va.transform(df)
 

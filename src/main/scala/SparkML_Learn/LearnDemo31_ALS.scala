@@ -6,9 +6,9 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
 import scala.Console.println
 
-object LearnDemo31_ALS {
+object LearnDemo31_ALS  extends Serializable {
   def main(args: Array[String]): Unit = {
-    // 创建 SparkSession
+    // 创建 SparkSession-
     val spark: SparkSession = SparkSession.builder().appName("MovieRecommendation").master("local[*]").getOrCreate()
     import spark.implicits._
 

@@ -4,7 +4,7 @@ import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.feature.{VectorIndexer, VectorIndexerModel}
 import org.apache.spark.ml.regression.DecisionTreeRegressor
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame,SparkSession}
 
 object LearnDemo24_DecisionTreeRegressor {
   def main(args: Array[String]): Unit = {

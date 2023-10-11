@@ -1,7 +1,7 @@
 package SparkML_Learn
 
 import org.apache.spark.ml.feature.{PCA, PCAModel}
-import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.linalg.{Vectors}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object LearnDemo07_PCA {

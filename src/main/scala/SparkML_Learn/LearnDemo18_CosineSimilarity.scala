@@ -1,6 +1,5 @@
 package SparkML_Learn
 
-import org.apache.spark.ml.feature.{BucketedRandomProjectionLSH, StringIndexer, VectorAssembler}
 import org.apache.spark.ml.linalg.{Vector, Vectors}
 import org.apache.spark.sql.SparkSession
 
@@ -30,7 +29,7 @@ object LearnDemo18_CosineSimilarity {
     // 示例向量
     val v1 = Vectors.dense(1.0, 2.0, 3.0)
     val v2 = Vectors.dense(4.0, 5.0, 6.0)
-
+    print(v1.getClass.getSimpleName)
     // 计算夹角余弦相似度
     val similarity = cosineSimilarity(v1, v2)
     println(s"Cosine similarity: $similarity")

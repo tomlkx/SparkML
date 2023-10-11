@@ -1,6 +1,6 @@
 package SparkML_ExcavteActualCombat
 
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{Row, SaveMode, SparkSession}
 import org.dom4j.{Document, DocumentHelper}
 
 import java.io.FileInputStream
@@ -9,29 +9,24 @@ import java.util.Properties
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.asScalaBufferConverter
 
-object demo03 {
+object demo03_1 {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder().appName("demo").master("local[*]").getOrCreate()
     import org.apache.spark.sql.functions._
     import spark.implicits._
     val pro = new Properties()
-    pro.load(new FileInputStream(URLDecoder.decode(demo03.getClass.getResource("/jdbc.properties").getPath, "utf-8")))
-    spark.read.jdbc("jdbc:mysql://192.168.45.5:20228/shtd_industry", "MachineData", pro).show()
-    spark.read.jdbc("jdbc:mysql://192.168.45.5:3306/shtd_industry", "MachineData", pro)
-    // 过滤为null
+    pro.load(new FileInputStream(URLDecoder.decode(demo03_1.getClass.getResource("/jdbc.properties").getPath, "utf-8")))
+    spark.read.jdbc("jdbc:mysql://localhost:3306/shtd_industry", "MachineData", pro).show()
+    val data = spark.read.jdbc("jdbc:mysql://localhost:3306/shtd_industry", "MachineData", pro)
+    // TODO 1.过滤为null
       .filter(item => {
-        item.get(3).toString != null
+        item.get(3) != null
       })
-    // 转换
+    // TODO 2.转换
       .map {
         case Row(machineRecordID: Int, machineID: Int, machineRecordState: String, machineRecordData: String, machineRecordDate: java.sql.Timestamp) =>
           (machineRecordID, machineID, machineRecordState, s"<xdd>${machineRecordData}</xdd>", machineRecordDate)
       }
-    // 过滤 不包含主轴倍率...的数据
-      .filter(item => {
-        DocumentHelper.parseText(item._4).getRootElement.elements().size() > 10
-      })
-      //      }.toDF("MachineRecordID","MachineID","MachineRecordState","MachineRecordData","MachineRecordDate")
       .map(item => {
         val document: Document = DocumentHelper.parseText(item._4)
         val hash = new mutable.HashMap[String, String]()
@@ -41,7 +36,7 @@ object demo03 {
         fact_machine_learning_data(
           item._1,
           item._2,
-          isStatus(hash.getOrElse("机器状态", 0.0).toString),
+          isStatus(item._3),
           h_get(hash, "主轴转速"),
           h_get(hash, "主轴倍率"),
           h_get(hash, "主轴负载"),
@@ -56,10 +51,17 @@ object demo03 {
           h_get(hash, "未使用内存"),
           h_get(hash, "可用程序量"),
           h_get(hash, "注册程序量"),
-          item._5.toString, "", "", "", ""
+          item._5.toString,
+          null,
+          "2022-07-30 11:11:11",
+          null,
+          "2022-07-30 11:11:11"
         )
       }
-      ).toDF().show()
+      ).toDF()
+      .write
+      .mode(SaveMode.Overwrite)
+      .jdbc("jdbc:mysql://localhost:3306/shtd_industry", "xds", pro)
     spark.stop()
   }
 
@@ -77,7 +79,7 @@ object demo03 {
 
   def isStatus(status: String): Double = {
     status match {
-      case "离线" => 1.0
+      case "报警" => 1.0
       case _ => 0.0
     }
   }

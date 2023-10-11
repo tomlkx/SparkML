@@ -25,7 +25,7 @@ object LearnDemo10_StringIndexer extends Serializable {
       //frequencyDesc 按照标签频率降序(默认)
       //frequencyAsc  按标签频率升序
       //alphabetDesc  降序字母顺序
-      //frequencyDesc 升序字母顺序
+      //alphabetAsc 升序字母顺序
       .setStringOrderType("frequencyDesc")
 
     // 拟合模型并进行转换

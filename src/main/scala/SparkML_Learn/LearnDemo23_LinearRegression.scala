@@ -2,9 +2,11 @@ package SparkML_Learn
 
 import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.regression.{LinearRegression, LinearRegressionModel, LinearRegressionTrainingSummary}
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame,  SparkSession}
 
-object LearnDemo23_LinearRegression {
+import java.io.Serializable
+
+object LearnDemo23_LinearRegression extends Serializable{
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder().appName("demo").master("local[*]").getOrCreate()
     // 加载训练数据

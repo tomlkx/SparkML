@@ -1,8 +1,8 @@
 package SparkML_Learn
 
-import org.apache.spark.ml.classification.{NaiveBayes, NaiveBayesModel}
+import org.apache.spark.ml.classification.NaiveBayes
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.SparkSession
 
 object LearnDemo19_NaiveBayes extends Serializable {
   def main(args: Array[String]): Unit = {
@@ -47,7 +47,6 @@ object LearnDemo19_NaiveBayes extends Serializable {
     evaluator.setMetricName("precision")
     accuracy = evaluator.evaluate(predictions)
     println(s"Test set precision = $accuracy")
-
     spark.stop()
   }
 }

@@ -9,10 +9,14 @@ object LearnDemo26_KMeans {
     // 创建SparkSession
     val spark: SparkSession = SparkSession.builder().appName("demo").master("local[*]").getOrCreate()
     // 加载数据
-    val data: DataFrame = spark.read.format("libsvm").load("data/mllib/sample_kmeans_data.txt")
+    val data: DataFrame = spark.read.format("libsvm").load("file://data/mllib/sample_kmeans_data.txt")
     data.show()
     // 创建KMeans 模型设置参数
     val kmeans: KMeans = new KMeans()
+      //特征列
+      .setFeaturesCol("features")
+      //预测输出列
+      .setPredictionCol("prediction")
       .setK(2) //设置聚类的簇数
     //训练KMeans模型
     val model: KMeansModel = kmeans.fit(data)
@@ -21,6 +25,8 @@ object LearnDemo26_KMeans {
     predictions.show(false)
     //评估聚类结果,计算Silhouette系数
     val evaluator = new ClusteringEvaluator()
+      .setFeaturesCol("features")
+      .setPredictionCol("prediction")
       .setMetricName("silhouette")
     val silhouette: Double = evaluator.evaluate(predictions)
     println(silhouette)
