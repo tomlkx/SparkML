@@ -7,7 +7,7 @@ import org.apache.spark.ml.linalg.{Vectors => SVectors}
 
 import java.util.Properties
 
-object demo01 {
+object demo01_01 {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder().appName("demo").master("local[8]").getOrCreate()
     val pro = new Properties()
