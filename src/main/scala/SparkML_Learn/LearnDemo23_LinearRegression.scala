@@ -17,7 +17,7 @@ object LearnDemo23_LinearRegression extends Serializable{
     val lr: LinearRegression = new LinearRegression()
       .setLabelCol("label")
       .setFeaturesCol("features")
-      .setMaxIter(100)
+      .setMaxIter(10)
     val lrModel: LinearRegressionModel = lr.fit(data1)
     // 对训练集上的模型进行总结并打印一些指标
     val trainingSummary: LinearRegressionTrainingSummary = lrModel.summary
@@ -31,7 +31,7 @@ object LearnDemo23_LinearRegression extends Serializable{
     val evaluator: RegressionEvaluator = new RegressionEvaluator()
       .setLabelCol("label")
       .setPredictionCol("prediction")
-      .setMetricName("rmse")
+      .setMetricName("mse")
     val frame: DataFrame = lrModel.transform(data2)
     val d: Double = evaluator.evaluate(frame)
     println(d)

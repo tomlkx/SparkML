@@ -1,12 +1,10 @@
 package SparkML_ExcavteActualCombat
 
-import org.apache.spark.ml.feature.{MaxAbsScaler, MinMaxScaler, PCA, PCAModel}
-import org.apache.spark.{SparkContext, ml}
+import org.apache.spark.ml.feature.{ PCA, PCAModel}
+import org.apache.spark.{SparkContext, mllib}
 import org.apache.spark.ml.linalg._
-import org.apache.spark.mllib.linalg.{Matrix, SingularValueDecomposition, Vectors => mllibVectors}
-import org.apache.spark.mllib.linalg.distributed.RowMatrix
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.mllib.linalg.{Vectors => mllibVectors}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.expressions.Window
 
 import java.util.Properties
@@ -15,12 +13,14 @@ import scala.collection.mutable
 object demo02 {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
-      .config("spark.driver.extraJavaOptions", "-Xss4M")
-      .config("spark.executor.extraJavaOptions", "-Xss4M")
+      .config("spark.sql.warehouse.dir","hdfs://bigdata1:9000/user/hive/warehouse")
+      .config("hive.metastore.uris","thrift://bigdata1:9083")
+      .enableHiveSupport()
       .appName("demo02")
       .master("local[*]")
       .getOrCreate()
     val sc: SparkContext = spark.sparkContext
+    sc.setLogLevel("ERROR")
     import spark.implicits._
     import org.apache.spark.sql.functions._
     val pro = new Properties()
@@ -46,8 +46,11 @@ object demo02 {
       }
       doubles.toList
     })
+    //透视函数
+
+
     spark.udf.register("xxxx", (list: List[Double]) => {
-      Vectors.dense(list.toArray)
+      mllibVectors.dense(list.toArray)
     })
     //升序排列
     spark.table("t1_data").sort('mapping, 'product_id).select('mapping, 'product_id).take(5).map(line => s"${line(0)},${line(1)}").foreach(println)
@@ -62,6 +65,11 @@ object demo02 {
       .withColumn("feature_list", expr("xxx(product_list,customer_product_list,mapping)"))
       .withColumn("feature_list_vector", expr("xxxx(feature_list)"))
     t2_data.createTempView("t2_data")
+    t2_data
+      .drop("product_list","product_list","customer_product_list","feature_list")
+      .write
+      .mode(SaveMode.Overwrite)
+      .saveAsTable("test")
     //输出第一行前五列
     println(spark.table("t2_data").select("feature_list").take(1).map(_(0).asInstanceOf[mutable.WrappedArray[Double]]).array(0).take(5).mkString(","))
 
@@ -77,7 +85,7 @@ object demo02 {
     //      .setInputCol("feature_list_vector")
     //      .setOutputCol("scaledFeatures")
     //    scaler.fit(spark.table("t2_data")).transform(spark.table("t2_data")).createTempView("t2_data_feature")
-    var frame = spark.table("t2_data")
+    var frame = spark.table("test")
       .where('customer_id =!= 5811)
       .withColumn("feature_avg", lit(0.0).cast("double"))
     spark.udf.register("xxxxx", (x1: Vector, x2: Vector) => {
@@ -97,19 +105,22 @@ object demo02 {
     //计算均值
     frame = frame.withColumn("feature_avg", col("feature_avg") / lit(tuples.length))
     frame.select("customer_id", "feature_avg").sort('feature_avg.desc).take(5).map(line=>(line(0),line(1))).zipWithIndex.map(line=>{s"相似度top${line._2 + 1}(商品id：${line._1._1}，平均相似度：${line._1._2})"}).foreach(println)
-
-    //val pca: PCAModel = new PCA()
-    //      .setInputCol("scaledFeatures")
-    //      .setOutputCol("pac_feature")
-    //      .setK(14000)
-    //      .fit(spark.table("t2_data_feature"))
-    //    pca.transform(spark.table("t2_data_feature")).show()
-    //val rdd = t2_data.select("feature_list").rdd.map(_(0).asInstanceOf[mutable.WrappedArray[Double]]).map(line => mllibVectors.dense(line.toArray))
+    frame.cache()
+//    val rowMatrix = new RowMatrix(frame.select("feature_list_vector").rdd.map(_(0).asInstanceOf[Vector]))
+//    val value: SingularValueDecomposition[RowMatrix, Matrix] = rowMatrix.computeSVD(5, computeU = true)
+//    val rows: RDD[linalg.Vector] = value.U.rows
+    val pca: PCAModel = new PCA()
+          .setInputCol("feature_list_vector")
+          .setOutputCol("pac_feature")
+          .setK(5)
+          .fit(spark.table("test"))
+        pca.transform(spark.table("test")).show()
+    val rdd = t2_data.select("feature_list").rdd.map(_(0).asInstanceOf[mutable.WrappedArray[Double]]).map(line => mllibVectors.dense(line.toArray))
     //缓存rdd
-    //    rdd.cache()
-    //    val matrix = new RowMatrix(rdd)
-    //    val xdd: SingularValueDecomposition[RowMatrix, Matrix] = matrix.computeSVD(14500, computeU = true)
-    //    xdd.V.rowIter.take(1).foreach(println)
+//        rdd.cache()
+//        val matrix = new RowMatrix(rdd)
+//        val xdd: SingularValueDecomposition[RowMatrix, Matrix] = matrix.computeSVD(5, computeU = true)
+//        xdd.V.rowIter.take(1).foreach(println)
 
     spark.stop()
   }

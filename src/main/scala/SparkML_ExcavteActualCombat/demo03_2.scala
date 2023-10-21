@@ -17,6 +17,7 @@
 //      .appName("demo")
 //      .master("local[*]")
 //      .getOrCreate()
+//
 //    def h_get(h: mutable.HashMap[String, String], key: String): Double = {
 //      isNUll(h.getOrElse(key, 0.0).toString)
 //    }
@@ -61,8 +62,8 @@
 //                                         )
 //    import spark.implicits._
 //    val pro = new Properties()
-//    pro.setProperty("user","root")
-//    pro.setProperty("password","123456")
+//    pro.setProperty("user", "root")
+//    pro.setProperty("password", "123456")
 //    val data = spark.read.jdbc("jdbc:mysql://bigdata1:3306/shtd_industry", "MachineData", pro)
 //      // TODO 1.过滤为null
 //      .filter(item => {

@@ -80,16 +80,18 @@ object demo01_02 {
       //查找前十个用户的订单
       .where('user_id.isin(top10_user_id.select("user_id").collect().map(_(0).asInstanceOf[Long]).toSeq: _*))
       //剔除前十个用户重复商品
-      .groupBy('sku_id, 'user_id)
+      .groupBy('sku_id)
       .agg(count(lit(1)) as "count")
       .join(sku_info_data)
       .where('sku_id === 'id)
-      .select("user_id", "id", "features")
+      .select("id", "features")
     // 初始化累加值 和 平均值
-    top10_sku = top10_sku.withColumn("sums",lit(0.0)).withColumn("avgs",lit(0.0))
+    top10_sku = top10_sku.withColumn("sums", lit(0.0)).withColumn("avgs", lit(0.0))
     //注册udf 夹角余弦相似度计算
     spark.udf.register("xxxx", (x1: Vector, x2: Vector) => {
+      //点积运算
       val v1 = x1.dot(x2)
+      //
       val v2 = Vectors.norm(x1, 2L) * Vectors.norm(x2, 2L)
       v1 / v2
     })
@@ -110,8 +112,9 @@ object demo01_02 {
           //计算平均值
           .withColumn("avgs", ('sums / rowBuffer.length).cast("double"))
     }
-    top10_sku.orderBy('avgs.desc).select('id,'avgs).take(5).zipWithIndex.map(
-      x=>s"相似度top${x._2 + 1}(商品id：${x._1(0)}，平均相似度：${x._1(1)})"
+
+    top10_sku.orderBy('avgs.desc).select('id, 'avgs).take(5).zipWithIndex.map(
+      x => s"相似度top${x._2 + 1}(商品id：${x._1(0)}，平均相似度：${x._1(1)})"
     ).foreach(println)
     spark.stop()
   }
