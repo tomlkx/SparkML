@@ -13,9 +13,10 @@ object demo01_02 {
     val pro = new Properties()
     pro.setProperty("user", "root")
     pro.setProperty("password", "123456")
+    spark.sparkContext.setLogLevel("ERROR")
     import org.apache.spark.sql.functions._
     import spark.implicits._
-    spark.read.jdbc("jdbc:mysql://bigdata1:3306/TEST", "sku_info", pro).createTempView("sku_info_xd")
+    spark.read.jdbc("jdbc:mysql://127.0.0.1:3306/TestData", "sku_info", pro).createTempView("sku_info_xd")
     var sku_info_data = spark.table("sku_info_xd").select("id", "spu_id", "price", "weight", "tm_id", "category3_id").withColumn("price", 'price.cast("Double"))
     //组合向量
     val va: VectorAssembler = new VectorAssembler()
@@ -53,15 +54,15 @@ object demo01_02 {
     }
     sku_info_data.show()
     //第一条数据的前10列
-    println(sku_info_data.drop("tm_id", "category3_id", "spu_id").orderBy("id").withColumn("id", 'id * 1.0).rdd.take(1)(0).toSeq.take(10).mkString(","))
+    println(sku_info_data.drop("tm_id", "category3_id", "spu_id").withColumn("id", 'id * 1.0).rdd.take(1)(0).toSeq.take(10).mkString(","))
     //组合向量
     val vs: VectorAssembler = new VectorAssembler()
       .setInputCols(buffer.toArray)
       .setOutputCol("features")
     sku_info_data = vs.transform(sku_info_data)
     //读取数据
-    spark.read.jdbc("jdbc:mysql://bigdata1:3306/TEST", "order_info", pro).createTempView("order_info")
-    spark.read.jdbc("jdbc:mysql://bigdata1:3306/TEST", "order_detail", pro).createTempView("order_detail")
+    spark.read.jdbc("jdbc:mysql://127.0.0.1:3306/TestData", "order_info", pro).createTempView("order_info")
+    spark.read.jdbc("jdbc:mysql://127.0.0.1:3306/TestData", "order_detail", pro).createTempView("order_detail")
     val doData = spark.table("order_info").join(spark.table("order_detail").drop("id"), 'order_id === 'id)
     //6708的所所有订单
     val order_6708 = spark.sql("select sku_id  from order_info f inner join order_detail z on z.order_id=f.id where f.user_id=6708")
@@ -71,8 +72,9 @@ object demo01_02 {
          |  select user_id,sku_id from order_info a inner join order_detail b on b.order_id=a.id where b.sku_id in(
          |     ${order_6708.collect().map(_(0)).mkString(",")}
          |  ) group by user_id,sku_id
-         |)t where user_id != 6708 group by user_id limit 10
+         |)t where user_id != 6708 group by user_id order by user_id limit 10
          |""".stripMargin)
+    top10_user_id.show()
     // 找到这十个人的所有订单
     var top10_sku: DataFrame = doData
       //剔除6708的已经购买的商品
