@@ -94,7 +94,11 @@
             <artifactId>flink-table-api-scala-bridge_${scala.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.codepoetics</groupId>
+            <artifactId>protonpack</artifactId>
+            <version>1.16</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-redis_2.11</artifactId>
@@ -240,35 +244,7 @@
 
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/scala</directory>
-            </resource>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
         <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.2</version>
-                <configuration>
-                    <recompileMode>incremental</recompileMode>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -279,4 +255,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
