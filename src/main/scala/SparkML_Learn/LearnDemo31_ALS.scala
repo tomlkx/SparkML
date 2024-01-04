@@ -9,7 +9,7 @@ import scala.Console.println
 object LearnDemo31_ALS  extends Serializable {
   def main(args: Array[String]): Unit = {
     // 创建 SparkSession-
-    val spark: SparkSession = SparkSession.builder().appName("MovieRecommendation").master("local[*]").getOrCreate()
+    val spark: SparkSession = SparkSession.builder().appName("MovieRecommendation").master("local[*]").config("spark.driver.bindAddress","127.0.0.1").getOrCreate()
     import spark.implicits._
 
     // 定义函数用于解析数据
@@ -49,7 +49,7 @@ object LearnDemo31_ALS  extends Serializable {
 
     // 为所有用户生成推荐结果
     val userRecs: DataFrame = model.recommendForAllUsers(10)
-
+    userRecs.show
     // 为所有电影生成推荐结果
     val movieRecs: DataFrame = model.recommendForAllItems(10)
 
