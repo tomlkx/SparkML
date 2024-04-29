@@ -6,8 +6,6 @@ import org.apache.spark.sql.{SparkSession}
 object pivot {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
-      .config("spark.driver.extraJavaOptions", "-Xss4M")
-      .config("spark.executor.extraJavaOptions", "-Xss4M")
       .appName("demo02")
       .master("local[*]")
       .getOrCreate()

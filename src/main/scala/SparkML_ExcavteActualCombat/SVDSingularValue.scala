@@ -5,7 +5,7 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
-object test4 {
+object SVDSingularValue {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder().appName("demo").master("local[*]").getOrCreate()
     // 创建用户-商品数据，10个商品，0表示未购买，1表示已购买

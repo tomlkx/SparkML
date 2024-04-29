@@ -47,8 +47,6 @@ object demo02 {
       doubles.toList
     })
     //透视函数
-
-
     spark.udf.register("xxxx", (list: List[Double]) => {
       mllibVectors.dense(list.toArray)
     })

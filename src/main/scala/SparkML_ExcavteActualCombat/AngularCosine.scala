@@ -14,7 +14,7 @@ import java.util.Properties
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-object test2 {
+object AngularCosine {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
       .config("spark.sql.warehouse.dir", "hdfs://bigdata1:9000/user/hive/warehouse")
