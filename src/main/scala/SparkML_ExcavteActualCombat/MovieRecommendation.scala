@@ -20,38 +20,13 @@ object MovieRecommendation {
 
     // 创建用户-电影评分矩阵，这是一个虚拟的矩阵，实际中应使用真实数据
     val ratings = Seq(
-      Vectors.dense(5.0, 4.0, 0.0, 0.0, 0.0),
-      Vectors.dense(4.0, 5.0, 0.0, 0.0, 0.0),
-      Vectors.dense(0.0, 0.0, 5.0, 4.0, 0.0),
-      Vectors.dense(0.0, 0.0, 4.0, 5.0, 0.0),
-      Vectors.dense(0.0, 0.0, 0.0, 0.0, 5.0)
+      (1,Vectors.dense(5.0, 4.0, 0.0, 0.0, 0.0)),
+      (2,Vectors.dense(4.0, 5.0, 0.0, 0.0, 0.0)),
+      (5,Vectors.dense(0.0, 0.0, 5.0, 4.0, 0.0)),
+      (3,Vectors.dense(0.0, 0.0, 4.0, 5.0, 0.0)),
+      (4,Vectors.dense(0.0, 0.0, 0.0, 0.0, 5.0))
     )
-
     val rows = sc.parallelize(ratings)
-
-    // 创建一个 RowMatrix
-    val matrix = new RowMatrix(rows)
-
-    // 执行SVD分解
-    val k = 2 // 设置保留的奇异值数量
-    val svd = matrix.computeSVD(k, computeU = true)
-
-    // 获取U、S和V矩阵
-    val U: RowMatrix = svd.U
-    val S: Vector = svd.s
-    val V = svd.V
-    U.rows.foreach(println)
-    println("----------")
-    println(S)
-    println("---------")
-    println(V)
-    println("----------")
-    println(V.rowIter.size)
-    val vector: Vector = V.rowIter.toList(3)
-    val doubles: List[Double] = V.rowIter.toList.take(4).map(x => {
-      x.dot(vector) / (Vectors.norm(x, 2) * Vectors.norm(vector, 2))
-    })
-    doubles.foreach(println)
     sc.stop()
   }
 }

@@ -5,7 +5,7 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
-object SVDSingularValue {
+object SVDSingularValue_top1 {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder().appName("demo").master("local[*]").getOrCreate()
     // 创建用户-商品数据，10个商品，0表示未购买，1表示已购买
@@ -27,7 +27,7 @@ object SVDSingularValue {
     val k = 5 // 保留前5个奇异值
     val svd = matrix.computeSVD(k, computeU = true)
 
-    // 获取左奇异向量（U）和奇异值（s）
+    // 获取左奇异向量(U)和奇异值(s)
     val U: RowMatrix = svd.U
     val s: Vector = svd.s
 

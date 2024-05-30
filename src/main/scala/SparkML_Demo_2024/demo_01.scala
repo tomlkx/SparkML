@@ -6,7 +6,10 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
 import scala.collection.mutable
 
-object demo {
+/***
+ * 自己做的数据  模拟写的
+ */
+object demo_01 {
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder().appName("demo").master("local[*]").getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
@@ -23,7 +26,7 @@ object demo {
      * -------------------相同种类前10的id结果展示为：--------------------
      * 1,2,901,4,5,21,32,91,14,52
      */
-    val user_id = 1
+    val user_id = 2
     val user_coll: DataFrame = user_collection
       .groupBy("用户id")
       .agg(collect_set('商品id.cast(IntegerType)) as "order_id_coll")
@@ -114,6 +117,7 @@ object demo {
       .join(fm, Array("t1"))
       .select("t1", "t2", "t3", "feature", "user_id")
     //计算相似度 积使用笛卡尔(交叉连接)
+    //获取 用户 1 的所有商品信息
     val frame: DataFrame = fm
       .where('t1.isin(to1coll.map(_.toDouble): _*))
       .select('feature as "CurrentUser1_feature", 't1 as "CurrentUser1_order_id")
@@ -135,7 +139,7 @@ object demo {
     println("------------------------推荐Top5结果如下------------------------")
     top10OrderDate
       .crossJoin(frame)
-      .withColumn("labels", concat('user_id, 't1, 'user_id))
+      .withColumn("labels", concat_ws(",",'user_id, 't1, 'user_id))
       .withColumn("相似度", expr("Similarity(feature,CurrentUser1_feature)"))
       .groupBy('labels)
       .agg(avg('相似度) as "avgSimilarity", first('t1) as "order_id")
